@@ -16,9 +16,9 @@ const app = express();
 
 const port = authConfig.api_port || 3001;
 const appPort = authConfig.server_port || 3000;
-const issuer = authConfig.AUTH0_ISSUER;
-const auth0ClientId = authConfig.AUTH0_CLIENT_ID;
-const auth0ClientSecret = authConfig.AUTH0_CLIENT_SECRET;
+const issuer = authConfig.authIssuer;
+const auth0ClientId = authConfig.AUTH0_M2M_CLIENT_ID;
+const auth0ClientSecret = authConfig.AUTH0_M2M_CLIENT_SECRET;
 const appOrigin = authConfig.appOrigin || `http://localhost:${appPort}`;
 const runningLocally = true;
 
@@ -58,18 +58,13 @@ app.get("/api/external", checkJwt, (req, res) => {
 });
 
 app.get("/api/get-full-id/:UserID", checkJwt, (req, res) => {
-  // const showFeature = checkFeature(req.params.UserID);
-
-  // const user = {
-  //   firstName: "Dave",
-  //   lastName: "Gorman",
-  //   key: "auth0|5f7f17576a1b02006e7ecf24",
-  // };
-
+  //Here we get the user information first...
+  //THEN we check if the user is eligible fo rthe feature.
+  //This is so we can populate the user's name, rather than 
+  //just the "unfriendly" user ID which I send from Auth0
 
   getFullAuth0ID(req.params.UserID)
     .then(function (response) {
-      console.log(response.data.nickname + " - " + response.data.user_id);
       checkFeature(response.data)
         .then(function (showFeature) {
           if (showFeature == true) {
@@ -77,7 +72,7 @@ app.get("/api/get-full-id/:UserID", checkJwt, (req, res) => {
             response.data.featureflagged = true;
             res.send({ msg: response.data });
           } else {
-            testLogging("dont runfor this user");
+            testLogging("dont run for this user");
             res.send({ msg: "User ID - " + response.data.user_id + " == == " + "E-Mail - " + response.data.email });
           }
         })
@@ -89,36 +84,7 @@ app.get("/api/get-full-id/:UserID", checkJwt, (req, res) => {
 
 });
 
-// const user = {
-//   firstName: "Dave",
-//   lastName: "Gorman",
-//   key: "auth0|5f7f17576a1b02006e7ecf24",
-// };
-
-// testLogging(ldClient.once("ready", function () {
-//   ldClient.variation(
-//     "PizzaOrderFlag",
-//     user,
-//     false)
-// }))
-//     ,
-//     function (err, showFeature) {
-//       console.log(
-//         "SDK successfully connected! The value of PizzaOrderFlag is " +
-//         showFeature +
-//         " for " +
-//         user.key
-//       );
-//       ldClient.flush(function () {
-//         ldClient.close();
-//       });
-//     }
-//   );
-// });
-
 app.listen(port, () => console.log(`API Server listening on port ${port}`));
-
-//===============================================================
 
 
 //Helper functions
@@ -130,7 +96,7 @@ async function checkFeature(userprofile) {
   };
   const answer = await ldClient.variation("PizzaOrderFlag", user, false);
 
-  testLogging("heres the answer - " + answer + " - userID = " + userprofile.user_id);
+  testLogging(userprofile.user_id + " will get the variation - " + answer);
   return answer;
 }
 
@@ -159,43 +125,6 @@ async function getManagamentApiToken() {
   }
 }
 
-async function verifyEmail(UserID) {
-  try {
-    testLogging(UserID);
-    testLogging(req.headers);
-
-    const bearerToken = await getManagamentApiToken();
-    // const bearerToken = responseToken.data.access_token
-    testLogging("verify email - api token:\n\n" + bearerToken)
-
-    if (bearerToken) {
-
-
-      const data = qs.stringify({
-        'user_id': UserID
-      });
-
-      const config = {
-        method: 'post',
-        url: `${issuer}api/v2/jobs/verification-email`,
-        headers: {
-          'Authorization': 'Bearer ' + bearerToken,
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        data: data,
-      };
-
-      const response = await axios(config);
-      // testLogging(response.json);
-      return response;
-    }
-  } catch (e) {
-    testLogging(e)
-  }
-
-  return response.write({ msg: "didnt work", });
-
-}
 
 function testLogging(message) {
   if (runningLocally) console.log(message);
@@ -225,59 +154,5 @@ async function getFullAuth0ID(UserID) {
 
   } catch (err) {
     testLogging("getFullAuth0ID: " + err)
-  }
-}
-
-async function getUserList() {
-  const url = `${issuer}api/v2/users`;
-  testLogging("get user list - url: " + url);
-
-  try {
-    //getting token to call auth0
-    const bearerToken = await getManagamentApiToken();
-
-    //using auth0 token to get the token auth0 has for googleAPI
-    testLogging("api token: " + bearerToken)
-    const config = {
-      url: url,
-      method: 'GET',
-      headers: {
-        'Authorization': 'Bearer ' + bearerToken,
-      }
-    };
-
-    const response = await axios(config);
-    testLogging("getUserList: response data: " + response.data);
-    return response;
-
-  } catch (err) {
-    testLogging("getUserList: " + err)
-  }
-}
-
-async function getAuth0Roles(UserID) {
-  const url = `${issuer}api/v2/users/${UserID}/roles`;
-  testLogging("getAuth0Roles - url: " + url);
-
-  try {
-    //getting token to call auth0
-    const bearerToken = await getManagamentApiToken();
-
-    //using auth0 token to get the token auth0 has for googleAPI
-    testLogging("api token: " + bearerToken)
-    const config = {
-      url: url,
-      method: 'GET',
-      headers: {
-        'Authorization': 'Bearer ' + bearerToken,
-      }
-    };
-
-    const response = await axios(config);
-    testLogging("Auth0getAuth0RolesID: response data: " + JSON.stringify(response.data[0].name));
-    return response;
-
-  } catch (err) {
-    testLogging("getAuth0Roles: " + err)
   }
 }

@@ -1,0 +1,11 @@
+{
+  "api_port": 3001,
+  "server_port": 3000,
+  "domain": "dev-kinamod-01.eu.auth0.com",
+  "audience": "https://dev-kinamod-01.eu.auth0.com/api/v2/",
+  "clientId": "L3qcr1Srl7KEdMpiPnpCub4TCXk4YHLy",
+  "clientSecret": "cpXcDhBEw4i7IcXb1cMjkZWh0solMfJNalnOcmeB-j7xwvm9GdSe48PR5IE7PE5a",
+  "AUTH0_M2M_CLIENT_ID": "2dgFsTxYpLabYXhehLJ2d1I6BcWJVU3M",
+  "AUTH0_M2M_CLIENT_SECRET": "p7mtZNge0D19XEoRgx263i3L70aFzMdl0nyX77ADwB0SW374r7UTRd-TI7FHAzFz",
+  "authIssuer": "https://dev-kinamod-01.eu.auth0.com/"
+}
