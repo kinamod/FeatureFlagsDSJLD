@@ -10,7 +10,10 @@ const axios = require('axios');
 const qs = require('qs');
 
 const LaunchDarkly = require("launchdarkly-node-server-sdk");
+
 const ldClient = LaunchDarkly.init("sdk-dbfea2c6-bae1-4d9d-931b-e6dd6058d930");
+//Replace the line above with the line below once you've inserted your key
+// const ldClient = LaunchDarkly.init(<YOUR SDK KEY>); //REPLACE SDK KEY HERE
 
 const app = express();
 
@@ -94,7 +97,7 @@ async function checkFeature(userprofile) {
     firstName: userprofile.nickname,
     key: userprofile.user_id
   };
-  const answer = await ldClient.variation("PizzaOrderFlag", user, false);
+  const answer = await ldClient.variation("ExtendedProfile", user, false);
 
   testLogging(userprofile.user_id + " will get the variation - " + answer);
   return answer;

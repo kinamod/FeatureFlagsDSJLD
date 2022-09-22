@@ -1,7 +1,6 @@
 import React from "react";
 import { Router, Route, Switch } from "react-router-dom";
 import { Container } from "reactstrap";
-import { withLDProvider } from 'launchdarkly-react-client-sdk';
 
 import Loading from "./components/Loading";
 import NavBar from "./components/NavBar";
